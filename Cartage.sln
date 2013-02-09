@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cartage", "src\Cartage.csproj", "{FCF45638-0582-4135-8DAD-71B77144F3BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cartage", "src\Cartage\Cartage.csproj", "{FCF45638-0582-4135-8DAD-71B77144F3BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
