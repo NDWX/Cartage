@@ -1,18 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
+using Pug.Application.Data;
 using Pug.Application.Security;
 
 namespace Pug.Cartage
 {
-	class Cart : ICart
+	class Cart<Sp> : ICart
+        where Sp : ICartInfoStoreProvider
 	{
-		ICartInfoStoreProviderFactory storeProviderFactory;
+        IApplicationData<Sp> storeProviderFactory;
 		ISecurityManager securityManager;
 
 		CartInfo cartInfo;
 
-		public Cart(string identifier, ICartInfoStoreProviderFactory storeProviderFactory, ISecurityManager securityManager)
+        public Cart(string identifier, IApplicationData<Sp> storeProviderFactory, ISecurityManager securityManager)
 		{
 			this.storeProviderFactory = storeProviderFactory;
 			this.securityManager = securityManager;

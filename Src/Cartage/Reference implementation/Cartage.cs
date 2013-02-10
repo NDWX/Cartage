@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
 
+using Pug.Application.Data;
 using Pug.Application.Security;
 
 namespace Pug.Cartage
 {
-	public class Cartage : ICartage
+	public class Cartage<Sp> : ICartage
+        where Sp : ICartInfoStoreProvider
 	{
-		ICartInfoStoreProviderFactory storeProviderFactory;
+        IApplicationData<Sp> storeProviderFactory;
 		ISecurityManager securityManager;
 
-		public Cartage(ICartInfoStoreProviderFactory storeProviderFactory, ISecurityManager securityManager)
+		public Cartage(IApplicationData<Sp> storeProviderFactory, ISecurityManager securityManager)
 		{
 			this.storeProviderFactory = storeProviderFactory;
 			this.securityManager = securityManager;
@@ -115,7 +117,7 @@ namespace Pug.Cartage
 				storeProvider.Dispose();
 			}
 
-			ICart cart = new Cart(identifier, storeProviderFactory, securityManager);
+			ICart cart = new Cart<Sp>(identifier, storeProviderFactory, securityManager);
 
 			return cart;
 		}
@@ -168,7 +170,7 @@ namespace Pug.Cartage
 
 			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
 
-			ICart cart = new Cart(identifier, storeProviderFactory, securityManager);
+			ICart cart = new Cart<Sp>(identifier, storeProviderFactory, securityManager);
 
 			return cart;
 		}

@@ -73,12 +73,11 @@
     <Compile Include="Reference implementation\CartLineInfo.cs" />
     <Compile Include="Reference implementation\CartSummary.cs" />
     <Compile Include="Reference implementation\ICartInfoStoreProvider.cs" />
-    <Compile Include="Reference implementation\ICartInfoStoreProviderFactory.cs" />
     <Compile Include="ICartLineAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y "$(TargetDir)*.*" "$(ProjectDir)..\Output\$(ConfigurationName)\"</PostBuildEvent>
+    <PostBuildEvent>copy /y "$(TargetDir)*.*" "$(ProjectDir)..\..\Output\$(ConfigurationName)\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
