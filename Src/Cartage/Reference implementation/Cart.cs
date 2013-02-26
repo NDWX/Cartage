@@ -124,7 +124,33 @@ namespace Pug.Cartage
 						storeProvider.DeleteLineAttribute(cartInfo.Identifier, line, name);
 
 				foreach (string attribute in attributes.Values)
-					storeProvider.UpdateLineAttribute(cartInfo.Identifier, line, attribute, attributes[attribute]);
+					storeProvider.SetLineAttribute(cartInfo.Identifier, line, attribute, attributes[attribute]);
+
+				SetModificationAttributes();
+
+				storeProvider.CommitTransaction();
+			}
+			catch
+			{
+				storeProvider.RollbackTransaction();
+
+				throw;
+			}
+			finally
+			{
+				storeProvider.Dispose();
+			}
+		}
+
+		public void SetLineAttribute(string line, string name, string value)
+		{
+			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+
+			try
+			{
+				storeProvider.BeginTransaction();
+				
+				storeProvider.SetLineAttribute(cartInfo.Identifier, line, name, value);
 
 				SetModificationAttributes();
 

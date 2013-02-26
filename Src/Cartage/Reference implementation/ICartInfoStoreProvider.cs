@@ -108,7 +108,7 @@ namespace Pug.Cartage
 		/// <param name="line">Line identifier</param>
 		/// <param name="name">Name of attribute to update</param>
 		/// <param name="value">New value of the specified attribute</param>
-		void UpdateLineAttribute(string cart, string line, string name, string value);
+		void SetLineAttribute(string cart, string line, string name, string value);
 		
 		/// <summary>
 		/// Delete item line attribute record.
