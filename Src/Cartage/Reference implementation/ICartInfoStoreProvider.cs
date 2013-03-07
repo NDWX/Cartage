@@ -23,7 +23,7 @@ namespace Pug.Cartage
 		/// <param name="registrationPeriod">Time period during which the cart was created, otherwise null.</param>
 		/// <param name="modificationPeriod">Time period during which the cart was last modified, otherwise null.</param>
 		/// <returns>A collection of CartInfo objects</returns>
-		ICollection<CartInfo> GetCarts(Range<DateTime> registrationPeriod, Range<DateTime> modificationPeriod);
+		ICollection<ICartInfo> GetCarts(Range<DateTime> registrationPeriod, Range<DateTime> modificationPeriod);
 
 		/// <summary>
 		/// Register new cart with specified identifier.
@@ -42,7 +42,7 @@ namespace Pug.Cartage
 		/// </summary>
 		/// <param name="identifier">Identifier of the cart record</param>
 		/// <returns>CartInfo object of specified identifier</returns>
-		CartInfo GetCart(string identifier);
+		ICartInfo GetCart(string identifier);
 
 		/// <summary>
 		/// Insert new line item record.
@@ -76,7 +76,7 @@ namespace Pug.Cartage
 		/// <param name="cart">Cart identifier</param>
 		/// <param name="identifier">Item line identifier</param>
 		/// <returns>Info of specified cart line</returns>
-		CartLineInfo GetLine(string cart, string identifier);
+		ICartLineInfo GetLine(string cart, string identifier);
 
 		/// <summary>
 		/// Get all attribute records of an item line.
@@ -84,14 +84,14 @@ namespace Pug.Cartage
 		/// <param name="cart">Cart identifier</param>
 		/// <param name="identifier">Line identifier</param>
 		/// <returns>Dictionary of attribute name and its info object</returns>
-		IDictionary<string, CartLineAttributeInfo> GetLineAttributes(string cart, string identifier);
+		IDictionary<string, ICartLineAttributeInfo> GetLineAttributes(string cart, string identifier);
 
 		/// <summary>
 		/// Get all item line records of a cart.
 		/// </summary>
 		/// <param name="cart">cart identifier</param>
 		/// <returns>A collection of item line info</returns>
-		ICollection<CartLineInfo> GetLines(string cart);
+		ICollection<ICartLineInfo> GetLines(string cart);
 					   
 		/// <summary>
 		/// Update quantity and attributes of an item line record.

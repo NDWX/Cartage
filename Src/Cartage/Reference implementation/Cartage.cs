@@ -183,7 +183,7 @@ namespace Pug.Cartage
 		{
 			CheckUserAuthorization("DeleteCart", new string[] { identifier }, null);
 
-			ICollection<CartLineInfo> cartLines;
+			ICollection<ICartLineInfo> cartLines;
 			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
 
 			try

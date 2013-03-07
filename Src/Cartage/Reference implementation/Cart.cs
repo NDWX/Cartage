@@ -13,7 +13,7 @@ namespace Pug.Cartage
         IApplicationData<Sp> storeProviderFactory;
 		ISecurityManager securityManager;
 
-		CartInfo cartInfo;
+		ICartInfo cartInfo;
 
         public Cart(string identifier, IApplicationData<Sp> storeProviderFactory, ISecurityManager securityManager)
 		{
@@ -52,8 +52,9 @@ namespace Pug.Cartage
 
 		void SetModificationAttributes()
 		{
-			cartInfo.LastModified = DateTime.Now;
-			cartInfo.LastModifyUser = securityManager.CurrentUser.Identity.Identifier;
+			cartInfo = new CartInfo(cartInfo.Identifier, cartInfo.Created, cartInfo.CreateUser, DateTime.Now, securityManager.CurrentUser.Identity.Identifier);
+			//cartInfo.LastModified = DateTime.Now;
+			//cartInfo.LastModifyUser = securityManager.CurrentUser.Identity.Identifier;
 		}
 
 		#region ICart Members
@@ -117,7 +118,7 @@ namespace Pug.Cartage
 
 				storeProvider.UpdateLine(cartInfo.Identifier, line, quantity);
 
-				IDictionary<string, CartLineAttributeInfo> knownAttributes = storeProvider.GetLineAttributes(cartInfo.Identifier, line);
+				IDictionary<string, ICartLineAttributeInfo> knownAttributes = storeProvider.GetLineAttributes(cartInfo.Identifier, line);
 
 				foreach(string name in knownAttributes.Keys)
 					if( !attributes.ContainsKey(name) )
@@ -198,9 +199,9 @@ namespace Pug.Cartage
 
 			CheckUserAuthorization("RemoveCartLine", null, operationContext);
 
-			CartLineInfo lineInfo = null;
+			ICartLineInfo lineInfo = null;
 			IDictionary<string, ICartLineAttributeInfo> lineAttributes = null;
-			CartLine cartLine = null;
+			ICartLine cartLine = null;
 			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
 
 			try
