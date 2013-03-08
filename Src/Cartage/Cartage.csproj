@@ -74,6 +74,7 @@
     <Compile Include="Reference implementation\CartSummary.cs" />
     <Compile Include="Reference implementation\ICartInfoStoreProvider.cs" />
     <Compile Include="ICartLineAttribute.cs" />
+    <Compile Include="UnknownCartLine.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
