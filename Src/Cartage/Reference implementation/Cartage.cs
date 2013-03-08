@@ -81,13 +81,7 @@ namespace Pug.Cartage
 			{
 				identifier = GetNewIdentifier();
 
-				try
-				{
-					cart = RegisterCart(identifier);
-				}
-				catch (CartExists)
-				{
-				}
+				cart = RegisterCart(identifier);
 			}
 
 			return cart;
@@ -165,12 +159,25 @@ namespace Pug.Cartage
 		/// <returns></returns>
 		public ICart GetCart(string identifier = "")
 		{
-
 			CheckUserAuthorization("GetCart", new string[] { identifier }, null);
+
+			ICart cart;
 
 			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
 
-			ICart cart = new Cart<Sp>(identifier, storeProviderFactory, securityManager);
+			try
+			{
+				if (!storeProvider.CartExists(identifier))
+				{
+					throw new CartNotFound(identifier);
+				}
+
+				cart = new Cart<Sp>(identifier, storeProviderFactory, securityManager);
+			}
+			finally
+			{
+				storeProvider.Dispose();
+			}
 
 			return cart;
 		}
