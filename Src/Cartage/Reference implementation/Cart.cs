@@ -7,8 +7,12 @@ using Pug.Application.Security;
 
 namespace Pug.Cartage
 {
+	public class CartFinalized : Exception
+	{
+	}
+
 	class Cart<Sp> : ICart
-        where Sp : ICartInfoStoreProvider
+        where Sp : ICartInfoStore
 	{
         IApplicationData<Sp> storeProviderFactory;
 		ISecurityManager securityManager;
@@ -20,13 +24,13 @@ namespace Pug.Cartage
 			this.storeProviderFactory = storeProviderFactory;
 			this.securityManager = securityManager;
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			this.cartInfo = storeProvider.GetCart(identifier);
 
 			if (cartInfo == null)
 			{
-				storeProvider.RegisterCart(identifier);
+				storeProvider.RegisterCart(identifier, securityManager.CurrentUser.Identity.Identifier);
 				cartInfo = storeProvider.GetCart(identifier);
 			}
 		}
@@ -50,9 +54,16 @@ namespace Pug.Cartage
 			}
 		}
 
+		private void CheckCartNotFinalized()
+		{
+
+			if (Info.IsFinalized)
+				throw new CartFinalized();
+		}
+
 		void SetModificationAttributes()
 		{
-			cartInfo = new CartInfo(cartInfo.Identifier, cartInfo.Created, cartInfo.CreateUser, DateTime.Now, securityManager.CurrentUser.Identity.Identifier);
+			cartInfo = new CartInfo(cartInfo.Identifier, cartInfo.Created, cartInfo.CreateUser, DateTime.Now, securityManager.CurrentUser.Identity.Identifier, cartInfo.IsFinalized);
 			//cartInfo.LastModified = DateTime.Now;
 			//cartInfo.LastModifyUser = securityManager.CurrentUser.Identity.Identifier;
 		}
@@ -70,18 +81,20 @@ namespace Pug.Cartage
 
 			CheckUserAuthorization("AddItemsToCart", null, operationContext);
 
+			CheckCartNotFinalized();
+
 			string lineIdentifier = GetNewIdentifier();
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
 				storeProvider.BeginTransaction();
 
-				storeProvider.InsertLine(cartInfo.Identifier, lineIdentifier, productCode, quantity);
+				storeProvider.InsertLine(cartInfo.Identifier, lineIdentifier, productCode, quantity, securityManager.CurrentUser.Identity.Identifier);
 
 				foreach (string attribute in attributes.Keys)
-					storeProvider.InsertLineAttribute(cartInfo.Identifier, lineIdentifier, attribute, attributes[attribute]);
+					storeProvider.InsertLineAttribute(cartInfo.Identifier, lineIdentifier, attribute, attributes[attribute], securityManager.CurrentUser.Identity.Identifier);
 
 				SetModificationAttributes();
 
@@ -107,25 +120,27 @@ namespace Pug.Cartage
 
 			CheckUserAuthorization("UpdateCartLine", null, operationContext);
 
+			CheckCartNotFinalized();
+
 			if (quantity < 0)
 				quantity = 0;
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
 				storeProvider.BeginTransaction();
 
-				storeProvider.UpdateLine(cartInfo.Identifier, line, quantity);
+				storeProvider.UpdateLine(cartInfo.Identifier, line, quantity, securityManager.CurrentUser.Identity.Identifier);
 
 				IDictionary<string, ICartLineAttributeInfo> knownAttributes = storeProvider.GetLineAttributes(cartInfo.Identifier, line);
 
 				foreach(string name in knownAttributes.Keys)
 					if( !attributes.ContainsKey(name) )
-						storeProvider.DeleteLineAttribute(cartInfo.Identifier, line, name);
+						storeProvider.DeleteLineAttribute(cartInfo.Identifier, line, name, securityManager.CurrentUser.Identity.Identifier);
 
 				foreach (string attribute in attributes.Values)
-					storeProvider.SetLineAttribute(cartInfo.Identifier, line, attribute, attributes[attribute]);
+					storeProvider.SetLineAttribute(cartInfo.Identifier, line, attribute, attributes[attribute], securityManager.CurrentUser.Identity.Identifier);
 
 				SetModificationAttributes();
 
@@ -145,13 +160,21 @@ namespace Pug.Cartage
 
 		public void SetLineAttribute(string line, string name, string value)
 		{
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			IDictionary<string, string> operationContext = new Dictionary<string, string>();
+
+			operationContext.Add("ATTRIBUTE_NAME", name);
+			operationContext.Add("ATTRIBUTE_NEW)VALUE", value);
+			CheckUserAuthorization("SetLineAttribute", null, operationContext);
+
+			CheckCartNotFinalized();
+
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
 				storeProvider.BeginTransaction();
-				
-				storeProvider.SetLineAttribute(cartInfo.Identifier, line, name, value);
+
+				storeProvider.SetLineAttribute(cartInfo.Identifier, line, name, value, securityManager.CurrentUser.Identity.Identifier);
 
 				SetModificationAttributes();
 
@@ -175,11 +198,13 @@ namespace Pug.Cartage
 
 			CheckUserAuthorization("RemoveCartLine", null, operationContext);
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			CheckCartNotFinalized();
+
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
-				storeProvider.DeleteLine(cartInfo.Identifier, identifier);
+				storeProvider.DeleteLine(cartInfo.Identifier, identifier, securityManager.CurrentUser.Identity.Identifier);
 
 				SetModificationAttributes();
 			}
@@ -202,7 +227,7 @@ namespace Pug.Cartage
 			ICartLineInfo lineInfo = null;
 			IDictionary<string, ICartLineAttributeInfo> lineAttributes = null;
 			ICartLine cartLine = null;
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
@@ -232,7 +257,7 @@ namespace Pug.Cartage
 
 			ICollection<ICartLineInfo> cartLines;
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
@@ -259,7 +284,7 @@ namespace Pug.Cartage
 			ICollection<ICartLineInfo> cartLines;
 			CartSummary summary;
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
@@ -279,17 +304,42 @@ namespace Pug.Cartage
 			return summary;
 		}
 
+		public void MarkAsFinalized()
+		{
+			IDictionary<string, string> operationContext = new Dictionary<string, string>();
+
+			CheckUserAuthorization("FinalizeCart", null, operationContext);
+
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
+
+			try
+			{
+				storeProvider.SetCartFinalized(cartInfo.Identifier, securityManager.CurrentUser.Identity.Identifier);
+				this.cartInfo = storeProvider.GetCart(this.cartInfo.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				storeProvider.Dispose();
+			}
+		}
+
 		public void Clear()
 		{
 			IDictionary<string, string> operationContext = new Dictionary<string, string>();
 
 			CheckUserAuthorization("ClearCart", null, operationContext);
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			CheckCartNotFinalized();
+
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
-				storeProvider.DeleteLines(cartInfo.Identifier);
+				storeProvider.DeleteLines(cartInfo.Identifier, securityManager.CurrentUser.Identity.Identifier);
 
 				SetModificationAttributes();
 			}
@@ -329,5 +379,6 @@ namespace Pug.Cartage
 
 			#endregion
 		}
+
 	}
 }

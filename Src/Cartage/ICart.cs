@@ -61,6 +61,8 @@ namespace Pug.Cartage
 		/// <returns>Summary object of cart</returns>
 		S GetCartSummary();
 
+		void MarkAsFinalized();
+
 		/// <summary>
 		/// Delete all lines in cart.
 		/// </summary>

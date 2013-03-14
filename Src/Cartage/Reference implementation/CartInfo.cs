@@ -7,14 +7,16 @@ namespace Pug.Cartage
 		string identifier;
 		DateTime created, lastModified;
 		string createUser, lastModifyUser;
+		bool finalized;
 
-		public CartInfo(string identifier, DateTime createTimestamp, string createUser, DateTime lastModified, string lastModifyUser)
+		public CartInfo(string identifier, DateTime createTimestamp, string createUser, DateTime lastModified, string lastModifyUser, bool finalized)
 		{
 			this.identifier = identifier;
 			this.created = createTimestamp;
 			this.createUser = createUser;
 			this.lastModified = lastModified;
 			this.lastModifyUser = lastModifyUser;
+			this.finalized = finalized;
 		}
 		public string Identifier
 		{
@@ -58,6 +60,11 @@ namespace Pug.Cartage
 			{
 				this.lastModifyUser = value;
 			}
+		}
+		
+		public bool IsFinalized
+		{
+			get { return this.finalized; }
 		}
 	}
 }

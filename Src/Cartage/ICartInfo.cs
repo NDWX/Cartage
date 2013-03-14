@@ -9,5 +9,6 @@ namespace Pug.Cartage
 		string Identifier { get; }
 		DateTime LastModified { get; }
 		string LastModifyUser { get; }
+		bool IsFinalized { get; }
 	}
 }

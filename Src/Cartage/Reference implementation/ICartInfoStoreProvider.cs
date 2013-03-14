@@ -8,7 +8,7 @@ namespace Pug.Cartage
 	/// <summary>
 	/// Implementation of this interface should update last modification user and timestamp.
 	/// </summary>
-	public interface ICartInfoStoreProvider :  IApplicationDataSession, IDisposable
+	public interface ICartInfoStore :  IApplicationDataSession, IDisposable
 	{
 		/// <summary>
 		/// Check whether cart with specified identifier exists in the store.
@@ -29,13 +29,13 @@ namespace Pug.Cartage
 		/// Register new cart with specified identifier.
 		/// </summary>
 		/// <param name="identifier">Identifier of the new cart</param>
-		void RegisterCart(string identifier);
+		void RegisterCart(string identifier, string user);
 
 		/// <summary>
 		/// Delete cart record.
 		/// </summary>
 		/// <param name="identifier">Identifier of cart record</param>
-		void DeleteCart(string identifier);
+		void DeleteCart(string identifier, string user);
 
 		/// <summary>
 		/// Get cart record of specified identifier.
@@ -51,7 +51,7 @@ namespace Pug.Cartage
 		/// <param name="identifier">Line identifier</param>
 		/// <param name="productCode">Product identifer</param>
 		/// <param name="quantity">Quantity of product</param>
-		void InsertLine(string cart, string identifier, string productCode, decimal quantity);
+		void InsertLine(string cart, string identifier, string productCode, decimal quantity, string user);
 
 		/// <summary>
 		/// Insert item line attribute record.
@@ -60,7 +60,7 @@ namespace Pug.Cartage
 		/// <param name="line">Item line identifier</param>
 		/// <param name="name">Name of the attribute</param>
 		/// <param name="value">Value of the attribute</param>
-		void InsertLineAttribute(string cart, string line, string name, string value);
+		void InsertLineAttribute(string cart, string line, string name, string value, string user);
 
 		/// <summary>
 		/// Whether item line record exists.
@@ -99,7 +99,7 @@ namespace Pug.Cartage
 		/// <param name="cart">Identifier of a cart</param>
 		/// <param name="identifier">Identifier of the line to update</param>
 		/// <param name="quantity">New quantity of specified item line</param>
-		void UpdateLine(string cart, string identifier, decimal quantity);
+		void UpdateLine(string cart, string identifier, decimal quantity, string user);
 
 		/// <summary>
 		/// Update existing item line attribute record.
@@ -108,7 +108,7 @@ namespace Pug.Cartage
 		/// <param name="line">Line identifier</param>
 		/// <param name="name">Name of attribute to update</param>
 		/// <param name="value">New value of the specified attribute</param>
-		void SetLineAttribute(string cart, string line, string name, string value);
+		void SetLineAttribute(string cart, string line, string name, string value, string user);
 		
 		/// <summary>
 		/// Delete item line attribute record.
@@ -116,19 +116,25 @@ namespace Pug.Cartage
 		/// <param name="cart">Cart identifier</param>
 		/// <param name="line">Line identifier</param>
 		/// <param name="name">Name of attribute to delete</param>
-		void DeleteLineAttribute(string cart, string line, string name);
+		void DeleteLineAttribute(string cart, string line, string name, string user);
 					   
 		/// <summary>
 		/// Delete record ofspecified line of specified cart.
 		/// </summary>
 		/// <param name="cart">Identifier of a cart</param>
 		/// <param name="identifier">Identifier of the line to delete</param>
-		void DeleteLine(string cart, string identifier);
+		void DeleteLine(string cart, string identifier, string user);
 
 		/// <summary>
 		/// Delete all item line records of a cart.
 		/// </summary>
 		/// <param name="cart">Identifier of a cart</param>
-		void DeleteLines(string cart);
+		void DeleteLines(string cart, string user);
+
+		/// <summary>
+		/// Set the finalized flag of a cart to true.
+		/// </summary>
+		/// <param name="cart"></param>
+		void SetCartFinalized(string cart, string user);
 	}
 }

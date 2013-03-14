@@ -7,7 +7,7 @@ using Pug.Application.Security;
 namespace Pug.Cartage
 {
 	public class Cartage<Sp> : ICartage
-        where Sp : ICartInfoStoreProvider
+        where Sp : ICartInfoStore
 	{
         IApplicationData<Sp> storeProviderFactory;
 		ISecurityManager securityManager;
@@ -46,7 +46,7 @@ namespace Pug.Cartage
 		{
 			CheckUserAuthorization("CartExists", new string[] {identifier}, null);
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			bool exists = false;
 
@@ -96,11 +96,11 @@ namespace Pug.Cartage
 		{
 			CheckUserAuthorization("RegisterCart", new string[] { identifier }, null);
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
-				storeProvider.RegisterCart(identifier);
+				storeProvider.RegisterCart(identifier, securityManager.CurrentUser.Identity.Identifier);
 			}
 			catch
 			{
@@ -134,7 +134,7 @@ namespace Pug.Cartage
 
 			ICollection<ICartInfo> carts;
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
@@ -163,7 +163,7 @@ namespace Pug.Cartage
 
 			ICart cart;
 
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
@@ -191,7 +191,7 @@ namespace Pug.Cartage
 			CheckUserAuthorization("DeleteCart", new string[] { identifier }, null);
 
 			ICollection<ICartLineInfo> cartLines;
-			ICartInfoStoreProvider storeProvider = storeProviderFactory.GetSession();
+			ICartInfoStore storeProvider = storeProviderFactory.GetSession();
 
 			try
 			{
@@ -202,9 +202,9 @@ namespace Pug.Cartage
 					storeProvider.BeginTransaction();
 
 					foreach (CartLineInfo line in cartLines)
-						storeProvider.DeleteLine(identifier, line.Identifier);
+						storeProvider.DeleteLine(identifier, line.Identifier, securityManager.CurrentUser.Identity.Identifier);
 
-					storeProvider.DeleteCart(identifier);
+					storeProvider.DeleteCart(identifier, securityManager.CurrentUser.Identity.Identifier);
 
 					storeProvider.CommitTransaction();
 				}
